@@ -15,6 +15,13 @@ class _NotePageState extends State<NotePage> {
   //TextController access to TextField
   final TextEditingController textEditingController = TextEditingController();
 
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    //On app startup
+    readNotes();
+  }
+
   // create a note
   void createNote(BuildContext context) {
     showDialog(
@@ -35,6 +42,8 @@ class _NotePageState extends State<NotePage> {
                   context.read<NoteDatabase>().addNote(
                     textEditingController.text,
                   );
+                  //clear text field
+                  textEditingController.clear();
                   Navigator.pop(context);
                 },
                 child: Text('Create'),
@@ -46,12 +55,55 @@ class _NotePageState extends State<NotePage> {
 
   // read a note
   void readNotes() {
-    context.watch<NoteDatabase>().fetchNotes();
+    context.read<NoteDatabase>().fetchNotes();
   }
 
   // update a note
+  void updateNote(BuildContext context, Note note) {
+    //pre-fill current text
+    textEditingController.text = note.text;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Update Note'),
+            content: TextField(
+              controller: textEditingController,
+              autofocus: true,
+            ),
+            actions: [
+              //Cancel button
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Cancel'),
+              ),
+
+              //Update button
+              MaterialButton(
+                onPressed: () {
+                  context.read<NoteDatabase>().updateNote(
+                    note.id,
+                    textEditingController.text,
+                  );
+                  //clear text field
+                  textEditingController.clear();
+                  Navigator.pop(context);
+                },
+                child: Text('Update'),
+              ),
+            ],
+          ),
+    );
+  }
 
   // delete a note
+  void deleteNote(Note note) {
+    context.read<NoteDatabase>().deleteNote(note.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     // NoteDatabase
@@ -64,7 +116,11 @@ class _NotePageState extends State<NotePage> {
         itemCount: currentNotes.length,
         itemBuilder: (context, index) {
           final note = currentNotes[index];
-          return NoteTile(note: note);
+          return NoteTile(
+            note: note,
+            deleteNote: () => deleteNote(note),
+            updateNote: () => updateNote(context, note),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

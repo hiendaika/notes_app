@@ -6,10 +6,14 @@ plugins {
 }
 
 android {
+
     namespace = "com.example.notes_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+//    if (project.android.hasProperty("namespace")) {
+//        namespace = "dev.isar.isar_flutter_libs"
+//    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
